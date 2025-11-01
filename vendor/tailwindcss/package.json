@@ -1,0 +1,8 @@
+{
+  "name": "tailwindcss",
+  "version": "3.4.0",
+  "bin": {
+    "tailwindcss": "./cli.js"
+  },
+  "main": "./index.js"
+}
