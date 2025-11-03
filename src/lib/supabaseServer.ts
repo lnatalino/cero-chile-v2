@@ -24,6 +24,15 @@ export default async function getSupabaseServerClient() {
         } catch (error) {
           console.warn('Supabase cookie remove warning:', error);
         }
+  const store = await cookies();
+  return createServerClient(url, key, {
+    cookies: {
+      get: async (name: string) => store.get(name)?.value,
+      set: async (name: string, value: string, _options?: Record<string, unknown>) => {
+        store.set({ name, value });
+      },
+      remove: async (name: string) => {
+        store.delete({ name });
       },
     },
   });

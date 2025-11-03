@@ -1,0 +1,9 @@
+{
+  "name": "react",
+  "version": "18.3.0",
+  "main": "./index.js",
+  "exports": {
+    ".": "./index.js",
+    "./jsx-runtime": "./jsx-runtime.js"
+  }
+}
