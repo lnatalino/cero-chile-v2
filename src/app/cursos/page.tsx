@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import getSupabaseServerClient from '@/lib/supabaseServer';
+import type { Course } from '@/lib/types';
 
 export type CourseRow = {
   id: number;
@@ -20,10 +21,32 @@ function formatCurrency(value: number | null, currency: 'CLP' | 'USD'): string {
   return new Intl.NumberFormat('es-CL', { style: 'currency', currency }).format(value);
 }
 
+function formatDate(value: string | null): string {
+  if (!value) return 'Por confirmar';
+  return new Date(value).toLocaleDateString('es-CL');
+}
+
 export default async function CoursesPage() {
   const supabase = await getSupabaseServerClient();
   const { data } = await supabase
     .from('courses')
+    .select('id, slug, title, description, location, date_start, date_end, price_clp, price_usd, cover_url, status')
+    .eq('status', 'published')
+    .order('date_start', { ascending: true });
+
+  const courses: Course[] = (data ?? []).map((course) => ({
+    id: course.id,
+    slug: course.slug,
+    title: course.title,
+    description: course.description ?? null,
+    location: course.location ?? null,
+    date_start: course.date_start,
+    date_end: course.date_end,
+    price_clp: course.price_clp ?? null,
+    price_usd: course.price_usd ?? null,
+    cover_url: course.cover_url ?? null,
+    status: course.status,
+  }));
     .select('*')
     .eq('status', 'published')
     .order('date_start', { ascending: true });
@@ -60,6 +83,11 @@ export default async function CoursesPage() {
               <dl className="grid grid-cols-2 gap-2 text-sm text-gray-600">
                 <div>
                   <dt className="font-semibold text-gray-800">Fecha de inicio</dt>
+                  <dd>{formatDate(course.date_start)}</dd>
+                </div>
+                <div>
+                  <dt className="font-semibold text-gray-800">Fecha de cierre</dt>
+                  <dd>{course.date_end ? formatDate(course.date_end) : 'Por confirmar'}</dd>
                   <dd>{course.date_start ? new Date(course.date_start).toLocaleDateString('es-CL') : 'Por confirmar'}</dd>
                 </div>
                 <div>
@@ -76,6 +104,10 @@ export default async function CoursesPage() {
                 </div>
               </dl>
               <div className="flex justify-end">
+                <Link
+                  href={`/cursos/${course.slug}`}
+                  className="rounded-full bg-orange-600 px-4 py-2 text-sm font-semibold text-white shadow transition hover:bg-orange-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-500"
+                >
                 <Link href={`/cursos/${course.slug}`} className="rounded-full bg-orange-600 px-4 py-2 text-sm font-semibold text-white">
                   Ver detalles
                 </Link>

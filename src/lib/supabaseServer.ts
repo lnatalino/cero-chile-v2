@@ -6,6 +6,24 @@ const url = env.NEXT_PUBLIC_SUPABASE_URL ?? 'https://stub.supabase.local';
 const key = env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? 'stub-key';
 
 export default async function getSupabaseServerClient() {
+  const cookieStore = await cookies();
+
+  return createServerClient(url, key, {
+    cookies: {
+      get: async (name: string) => cookieStore.get(name)?.value,
+      set: async (name: string, value: string) => {
+        try {
+          cookieStore.set({ name, value });
+        } catch (error) {
+          console.warn('Supabase cookie set warning:', error);
+        }
+      },
+      remove: async (name: string) => {
+        try {
+          cookieStore.delete({ name });
+        } catch (error) {
+          console.warn('Supabase cookie remove warning:', error);
+        }
   const store = await cookies();
   return createServerClient(url, key, {
     cookies: {

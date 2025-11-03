@@ -1,5 +1,9 @@
 import { NextResponse } from 'next/server';
 import getSupabaseServerClient from '@/lib/supabaseServer';
+import type { PaymentCurrency, PaymentMethod } from '@/lib/types';
+
+const PAYMENT_METHODS = new Set<PaymentMethod>(['webpay', 'transfer', 'cash']);
+const PAYMENT_CURRENCIES = new Set<PaymentCurrency>(['CLP', 'USD']);
 
 const PAYMENT_METHODS = new Set(['webpay', 'transfer', 'cash'] as const);
 
@@ -10,6 +14,7 @@ interface EnrollPayload {
   full_name: string;
   email: string;
   method: PaymentMethod;
+  payment_currency: PaymentCurrency;
 }
 
 function parseFormData(formData: URLSearchParams | FormData): Partial<EnrollPayload> {
@@ -20,6 +25,7 @@ function parseFormData(formData: URLSearchParams | FormData): Partial<EnrollPayl
     full_name: get('full_name') ?? undefined,
     email: get('email') ?? undefined,
     method: (get('method') as PaymentMethod | undefined) ?? undefined,
+    payment_currency: (get('payment_currency') as PaymentCurrency | undefined) ?? undefined,
   };
 }
 
@@ -53,6 +59,9 @@ function validate(payload: Partial<EnrollPayload>): payload is EnrollPayload {
   if (!payload.method || !PAYMENT_METHODS.has(payload.method)) {
     return false;
   }
+  if (!payload.payment_currency || !PAYMENT_CURRENCIES.has(payload.payment_currency)) {
+    return false;
+  }
   return true;
 }
 
@@ -74,12 +83,25 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Curso no encontrado' }, { status: 404 });
   }
 
+  if (course.status !== 'published') {
+    return NextResponse.json({ error: 'Curso no disponible para inscripciones' }, { status: 403 });
+  }
+
+  const { error: insertError } = await supabase.from('enrollments').insert({
   await supabase.from('enrollments').insert({
     course_id: payload.course_id,
     full_name: payload.full_name.trim(),
     email: payload.email.trim().toLowerCase(),
     method: payload.method,
     payment_status: 'pending',
+    payment_currency: payload.payment_currency,
+  });
+
+  if (insertError) {
+    console.error('Error inserting enrollment', insertError);
+    return NextResponse.json({ error: 'No fue posible registrar la inscripción' }, { status: 500 });
+  }
+
     payment_currency: 'CLP',
   });
 
@@ -89,6 +111,8 @@ export async function POST(request: Request) {
 
   const instructions =
     payload.method === 'transfer'
+      ? `Recibirás un correo con los datos bancarios para transferir en ${payload.payment_currency}.`
+      : `Nuestro equipo te contactará para coordinar el pago en efectivo en ${payload.payment_currency}.`;
       ? 'Recibirás un correo con los datos bancarios para transferir.'
       : 'Nuestro equipo te contactará para coordinar el pago en efectivo el día del curso.';
 

@@ -1,6 +1,9 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import getSupabaseServerClient from '@/lib/supabaseServer';
+import type { AdminRole } from '@/lib/types';
+
+const ADMIN_ROLES = new Set<AdminRole>(['admin', 'gestor', 'faculty']);
 
 const ADMIN_ROLES = new Set(['admin', 'gestor', 'faculty'] as const);
 
@@ -15,6 +18,11 @@ export default async function AdminPage() {
     redirect('/login?redirect=/admin');
   }
 
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('full_name, role')
+    .eq('id', user.id)
+    .maybeSingle();
   const { data: profile } = await supabase.from('profiles').eq('id', user.id).maybeSingle();
   const role = profile?.role as AdminRole | undefined;
 
@@ -43,6 +51,10 @@ export default async function AdminPage() {
           >
             <h2 className="text-lg font-semibold text-gray-900">{tab.label}</h2>
             <p className="mt-2 text-sm text-gray-600">{tab.description}</p>
+            <Link
+              href={`/admin/${tab.key}`}
+              className="mt-4 inline-flex text-sm font-semibold text-orange-600 transition hover:text-orange-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-500"
+            >
             <Link href={`/admin/${tab.key}`} className="mt-4 inline-flex text-sm font-semibold text-orange-600">
               Abrir sección
             </Link>

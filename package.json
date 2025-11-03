@@ -7,6 +7,26 @@
     "dev": "next dev -p 3004",
     "start": "next start -p 3004",
     "build": "next build",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@supabase/ssr": "latest",
+    "next": "latest",
+    "pdf-lib": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "resend": "latest"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "latest",
+    "@types/node": "latest",
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "autoprefixer": "latest",
+    "eslint": "latest",
+    "postcss": "latest",
+    "tailwindcss": "latest",
+    "typescript": "latest"
     "lint": "next lint",
     "typecheck": "tsc --noEmit"
   },

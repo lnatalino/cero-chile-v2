@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import getSupabaseServerClient from '@/lib/supabaseServer';
+import type { Course, PaymentCurrency, PaymentMethod } from '@/lib/types';
 
 interface CourseDetail {
   id: number;
@@ -19,10 +20,47 @@ function formatCurrency(value: number | null, currency: 'CLP' | 'USD') {
   return new Intl.NumberFormat('es-CL', { style: 'currency', currency }).format(value);
 }
 
+function formatDate(value: string | null) {
+  if (!value) return 'Por confirmar';
+  return new Date(value).toLocaleDateString('es-CL');
+}
+
 export default async function CourseDetailPage({ params }: { params: { slug: string } }) {
   const supabase = await getSupabaseServerClient();
   const { data: course } = await supabase
     .from('courses')
+    .select('id, slug, title, description, location, date_start, date_end, price_clp, price_usd, cover_url, status')
+    .eq('slug', params.slug)
+    .maybeSingle();
+
+  if (!course || course.status !== 'published') {
+    notFound();
+  }
+
+  const typedCourse: Course = {
+    id: course.id,
+    slug: course.slug,
+    title: course.title,
+    description: course.description ?? null,
+    location: course.location ?? null,
+    date_start: course.date_start,
+    date_end: course.date_end,
+    price_clp: course.price_clp ?? null,
+    price_usd: course.price_usd ?? null,
+    cover_url: course.cover_url ?? null,
+    status: course.status,
+  };
+
+  const paymentMethods: { value: PaymentMethod; label: string }[] = [
+    { value: 'webpay', label: 'Webpay' },
+    { value: 'transfer', label: 'Transferencia' },
+    { value: 'cash', label: 'Efectivo' },
+  ];
+
+  const currencies: { value: PaymentCurrency; label: string }[] = [
+    { value: 'CLP', label: 'Peso chileno (CLP)' },
+    { value: 'USD', label: 'Dólar estadounidense (USD)' },
+  ];
     .select('*')
     .eq('slug', params.slug)
     .maybeSingle();
@@ -47,6 +85,11 @@ export default async function CourseDetailPage({ params }: { params: { slug: str
         <div className="grid gap-4 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm sm:grid-cols-2">
           <div>
             <dt className="text-sm font-semibold text-gray-800">Fecha de inicio</dt>
+            <dd className="text-sm text-gray-600">{formatDate(typedCourse.date_start)}</dd>
+          </div>
+          <div>
+            <dt className="text-sm font-semibold text-gray-800">Fecha de término</dt>
+            <dd className="text-sm text-gray-600">{typedCourse.date_end ? formatDate(typedCourse.date_end) : 'Por confirmar'}</dd>
             <dd className="text-sm text-gray-600">
               {typedCourse.date_start ? new Date(typedCourse.date_start).toLocaleDateString('es-CL') : 'Por confirmar'}
             </dd>
@@ -111,6 +154,33 @@ export default async function CourseDetailPage({ params }: { params: { slug: str
               id="method"
               name="method"
               className="rounded-lg border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-orange-500 focus:outline-none"
+            >
+              {paymentMethods.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="grid gap-1">
+            <label htmlFor="payment_currency" className="text-sm font-medium text-gray-800">
+              Moneda de pago
+            </label>
+            <select
+              id="payment_currency"
+              name="payment_currency"
+              className="rounded-lg border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-orange-500 focus:outline-none"
+            >
+              {currencies.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+            <button
+              type="submit"
+              className="mt-2 rounded-full bg-orange-600 px-4 py-2 text-sm font-semibold text-white shadow transition hover:bg-orange-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-500"
             >
               <option value="webpay">Webpay</option>
               <option value="transfer">Transferencia</option>
