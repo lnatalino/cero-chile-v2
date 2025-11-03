@@ -1,23 +1,89 @@
 import Link from 'next/link';
 import getSupabaseServerClient from '@/lib/supabaseServer';
+import type { AdminRole } from '@/lib/types';
+
+const NAV_LINK_CLASSES =
+  'rounded-full px-3 py-1 text-sm font-medium transition-colors hover:bg-orange-100 hover:text-orange-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-500';
+
+const NAV_ITEMS = [
+  { href: '/', label: 'Inicio' },
+  { href: '/cursos', label: 'Cursos' },
+  { href: '/galeria', label: 'Galería' },
+  { href: '/sobre', label: 'Sobre' },
+  { href: '/contacto', label: 'Contacto' },
+];
+
+async function resolveRole(userId: string | null) {
+  if (!userId) return null;
+  const client = await getSupabaseServerClient();
+  const { data } = await client.from('profiles').eq('id', userId).maybeSingle();
+  return (data?.role as 'admin' | 'gestor' | 'faculty' | 'student' | null) ?? null;
+}
 
 export default async function NavBar() {
-  const s = getSupabaseServerClient();
-  const {
-    data: { user }
-  } = await s.auth.getUser();
+  const supabase = await getSupabaseServerClient();
+  const { data: auth } = await supabase.auth.getUser();
+  const user = auth.user;
+  let role: AdminRole | null = null;
 
-  let role: 'admin' | 'faculty' | 'student' | null = null;
   if (user) {
-    const { data } = await s.from('profiles').select('role').eq('id', user.id).maybeSingle();
-    role = (data?.role ?? null) as any;
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .maybeSingle();
+
+    const candidate = profile?.role ?? null;
+    if (candidate === 'admin' || candidate === 'gestor' || candidate === 'faculty') {
+      role = candidate;
+    }
   }
 
   return (
+    <header className="border-b border-orange-100 bg-white/80 backdrop-blur">
+      <nav className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
+        <Link href="/" className="text-lg font-semibold tracking-tight text-orange-700">
+          CERO Chile
+        </Link>
+        <ul className="flex list-none items-center gap-3 text-sm font-medium text-gray-700">
+          {NAV_ITEMS.map((item) => (
+            <li key={item.href}>
+              <Link href={item.href} className={NAV_LINK_CLASSES}>
+                {item.label}
+              </Link>
+            </li>
+          ))}
+          {user ? (
+            <>
+              {role && (
+                <li>
+                  <Link href="/admin" className={NAV_LINK_CLASSES}>
+                    Admin
+                  </Link>
+                </li>
+              )}
+              <li className="hidden text-xs font-normal text-gray-500 sm:block">{user.email}</li>
+              <li>
+                <Link href="/logout" className={NAV_LINK_CLASSES}>
+                  Salir
+                </Link>
+              </li>
+            </>
+          ) : (
+            <li>
+              <Link href="/login" className={NAV_LINK_CLASSES}>
+                Ingresar
+              </Link>
+            </li>
+  const role = await resolveRole(user?.id ?? null);
+
+  return (
     <header className="border-b bg-white/80 backdrop-blur">
-      <nav className="mx-auto max-w-5xl px-4 py-3 flex items-center justify-between">
-        <Link href="/" className="font-semibold">CERO-CHILE</Link>
-        <ul className="flex gap-4 text-sm">
+      <nav className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
+        <Link href="/" className="text-lg font-semibold tracking-tight">
+          CERO Chile
+        </Link>
+        <ul className="flex list-none items-center gap-5 text-sm font-medium">
           <li><Link href="/">Inicio</Link></li>
           <li><Link href="/cursos">Cursos</Link></li>
           <li><Link href="/galeria">Galería</Link></li>
@@ -25,9 +91,10 @@ export default async function NavBar() {
           <li><Link href="/contacto">Contacto</Link></li>
           {user ? (
             <>
-              {role === 'admin' && <li><Link href="/admin">Admin</Link></li>}
-              {role === 'faculty' && <li><Link href="/mis-cursos">Mis cursos</Link></li>}
-              <li className="opacity-70">{user.email}</li>
+              {(role === 'admin' || role === 'gestor' || role === 'faculty') && (
+                <li><Link href="/admin">Admin</Link></li>
+              )}
+              <li className="text-xs font-normal text-gray-500">{user.email}</li>
               <li><Link href="/logout">Salir</Link></li>
             </>
           ) : (

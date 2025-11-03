@@ -1,35 +1,38 @@
 import { cookies } from 'next/headers';
-import { createServerClient, type CookieOptions } from '@supabase/ssr';
+import { createServerClient } from '@supabase/ssr';
 
 const env = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process?.env ?? {};
 const url = env.NEXT_PUBLIC_SUPABASE_URL ?? 'https://stub.supabase.local';
 const key = env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? 'stub-key';
 
-export default function getSupabaseServerClient() {
-  const cookieStore = cookies();
-  const mutableCookies = cookieStore as unknown as {
-    set: (options: { name: string; value: string } & Partial<CookieOptions>) => void;
-    delete: (options: { name: string } & Partial<CookieOptions>) => void;
-  };
+export default async function getSupabaseServerClient() {
+  const cookieStore = await cookies();
 
   return createServerClient(url, key, {
     cookies: {
-      get(name: string) {
-        return cookieStore.get(name)?.value;
-      },
-      set(name: string, value: string, options?: CookieOptions) {
+      get: async (name: string) => cookieStore.get(name)?.value,
+      set: async (name: string, value: string) => {
         try {
-          mutableCookies.set({ name, value, ...(options ?? {}) });
+          cookieStore.set({ name, value });
         } catch (error) {
           console.warn('Supabase cookie set warning:', error);
         }
       },
-      remove(name: string, options?: CookieOptions) {
+      remove: async (name: string) => {
         try {
-          mutableCookies.delete({ name, ...(options ?? {}) });
+          cookieStore.delete({ name });
         } catch (error) {
           console.warn('Supabase cookie remove warning:', error);
         }
+  const store = await cookies();
+  return createServerClient(url, key, {
+    cookies: {
+      get: async (name: string) => store.get(name)?.value,
+      set: async (name: string, value: string, _options?: Record<string, unknown>) => {
+        store.set({ name, value });
+      },
+      remove: async (name: string) => {
+        store.delete({ name });
       },
     },
   });

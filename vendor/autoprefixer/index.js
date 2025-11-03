@@ -1,6 +1,6 @@
-module.exports = function tailwindcssPostcss() {
+module.exports = function autoprefixer() {
   return {
-    postcssPlugin: '@tailwindcss/postcss',
+    postcssPlugin: 'autoprefixer',
     Once(root) {
       return root;
     }

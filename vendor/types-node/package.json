@@ -1,0 +1,5 @@
+{
+  "name": "@types/node",
+  "version": "20.17.10",
+  "types": "index.d.ts"
+}
