@@ -14,7 +14,7 @@ function PostsCarousel({ posts }: { posts: Post[] }) {
         <Link
           key={post.id}
           href={`/posts/${post.slug}`}
-          className="group flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+          className="group flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-orange-500"
         >
           <div className="aspect-[16/9] bg-gray-100" aria-hidden>
             {post.cover_url ? (
@@ -80,15 +80,21 @@ export default async function HomePage() {
     <section className="space-y-12">
       <div className="rounded-3xl bg-gradient-to-r from-orange-500 to-amber-500 px-6 py-12 text-white shadow-lg">
         <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Centro de Entrenamiento en Recursos y Operaciones</h1>
-        <p className="mt-4 max-w-2xl text-lg text-orange-50">
-          Formación continua para profesionales de las ciencias de la tierra, con foco en experiencias de terreno, laboratorios y
-          herramientas digitales.
+        <p className="mt-4 max-w-2xl text-lg text-orange-50 text-balance">
+          Formación continua para profesionales de las ciencias de la tierra, con foco en experiencias de terreno, laboratorios
+          y herramientas digitales.
         </p>
         <div className="mt-6 flex flex-wrap gap-3">
-          <Link href="/cursos" className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-orange-600 shadow">
+          <Link
+            href="/cursos"
+            className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-orange-600 shadow transition hover:-translate-y-0.5 hover:bg-orange-50"
+          >
             Ver cursos disponibles
           </Link>
-          <Link href="/contacto" className="rounded-full bg-orange-700/70 px-4 py-2 text-sm font-semibold text-white shadow">
+          <Link
+            href="/contacto"
+            className="rounded-full bg-orange-700/70 px-4 py-2 text-sm font-semibold text-white shadow transition hover:-translate-y-0.5 hover:bg-orange-700"
+          >
             Agenda una reunión
           </Link>
         </div>
@@ -97,7 +103,7 @@ export default async function HomePage() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <h2 className="text-2xl font-semibold">Próximos cursos</h2>
-          <Link href="/cursos" className="text-sm font-semibold text-orange-600 hover:text-orange-700">
+          <Link href="/cursos" className="text-sm font-semibold text-orange-600 transition hover:text-orange-700">
             Ver todos
           </Link>
         </div>
@@ -106,7 +112,7 @@ export default async function HomePage() {
             <Link
               key={course.id}
               href={`/cursos/${course.slug}`}
-              className="flex flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+              className="flex flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-orange-500"
             >
               <div className="aspect-[4/3] bg-gray-100" aria-hidden>
                 {course.cover_url ? (
@@ -137,7 +143,7 @@ export default async function HomePage() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <h2 className="text-2xl font-semibold">Novedades</h2>
-          <Link href="/posts" className="text-sm font-semibold text-orange-600 hover:text-orange-700">
+          <Link href="/posts" className="text-sm font-semibold text-orange-600 transition hover:text-orange-700">
             Explorar blog
           </Link>
         </div>

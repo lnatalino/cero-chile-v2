@@ -10,22 +10,22 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@supabase/ssr": "file:vendor/supabase-ssr",
-    "next": "file:vendor/next",
-    "pdf-lib": "file:vendor/pdf-lib",
-    "react": "file:vendor/react",
-    "react-dom": "file:vendor/react-dom",
-    "resend": "file:vendor/resend"
+    "@supabase/ssr": "latest",
+    "next": "latest",
+    "pdf-lib": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "resend": "latest"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "file:vendor/tailwindcss-postcss",
-    "@types/node": "file:vendor/types-node",
-    "@types/react": "file:vendor/types-react",
-    "@types/react-dom": "file:vendor/types-react-dom",
-    "autoprefixer": "file:vendor/autoprefixer",
-    "eslint": "file:/root/.nvm/versions/node/v22.19.0/lib/node_modules/eslint",
-    "postcss": "file:vendor/postcss",
-    "tailwindcss": "file:vendor/tailwindcss",
-    "typescript": "file:/root/.nvm/versions/node/v22.19.0/lib/node_modules/typescript"
+    "@tailwindcss/postcss": "latest",
+    "@types/node": "latest",
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "autoprefixer": "latest",
+    "eslint": "latest",
+    "postcss": "latest",
+    "tailwindcss": "latest",
+    "typescript": "latest"
   }
 }

@@ -80,7 +80,10 @@ export default async function CoursesPage() {
                 </div>
               </dl>
               <div className="flex justify-end">
-                <Link href={`/cursos/${course.slug}`} className="rounded-full bg-orange-600 px-4 py-2 text-sm font-semibold text-white">
+                <Link
+                  href={`/cursos/${course.slug}`}
+                  className="rounded-full bg-orange-600 px-4 py-2 text-sm font-semibold text-white shadow transition hover:bg-orange-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-500"
+                >
                   Ver detalles
                 </Link>
               </div>

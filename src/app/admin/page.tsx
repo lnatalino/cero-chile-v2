@@ -46,7 +46,10 @@ export default async function AdminPage() {
           >
             <h2 className="text-lg font-semibold text-gray-900">{tab.label}</h2>
             <p className="mt-2 text-sm text-gray-600">{tab.description}</p>
-            <Link href={`/admin/${tab.key}`} className="mt-4 inline-flex text-sm font-semibold text-orange-600">
+            <Link
+              href={`/admin/${tab.key}`}
+              className="mt-4 inline-flex text-sm font-semibold text-orange-600 transition hover:text-orange-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-500"
+            >
               Abrir sección
             </Link>
           </div>
