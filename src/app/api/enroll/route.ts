@@ -5,6 +5,10 @@ import type { PaymentCurrency, PaymentMethod } from '@/lib/types';
 const PAYMENT_METHODS = new Set<PaymentMethod>(['webpay', 'transfer', 'cash']);
 const PAYMENT_CURRENCIES = new Set<PaymentCurrency>(['CLP', 'USD']);
 
+const PAYMENT_METHODS = new Set(['webpay', 'transfer', 'cash'] as const);
+
+type PaymentMethod = 'webpay' | 'transfer' | 'cash';
+
 interface EnrollPayload {
   course_id: number;
   full_name: string;
@@ -62,7 +66,7 @@ function validate(payload: Partial<EnrollPayload>): payload is EnrollPayload {
 }
 
 export async function POST(request: Request) {
-  const supabase = getSupabaseServerClient();
+  const supabase = await getSupabaseServerClient();
   const payload = await readPayload(request);
 
   if (!validate(payload)) {
@@ -84,6 +88,7 @@ export async function POST(request: Request) {
   }
 
   const { error: insertError } = await supabase.from('enrollments').insert({
+  await supabase.from('enrollments').insert({
     course_id: payload.course_id,
     full_name: payload.full_name.trim(),
     email: payload.email.trim().toLowerCase(),
@@ -97,6 +102,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'No fue posible registrar la inscripción' }, { status: 500 });
   }
 
+    payment_currency: 'CLP',
+  });
+
   if (payload.method === 'webpay') {
     return NextResponse.redirect('https://www.transbank.cl/webpay-placeholder', 302);
   }
@@ -105,6 +113,8 @@ export async function POST(request: Request) {
     payload.method === 'transfer'
       ? `Recibirás un correo con los datos bancarios para transferir en ${payload.payment_currency}.`
       : `Nuestro equipo te contactará para coordinar el pago en efectivo en ${payload.payment_currency}.`;
+      ? 'Recibirás un correo con los datos bancarios para transferir.'
+      : 'Nuestro equipo te contactará para coordinar el pago en efectivo el día del curso.';
 
   return NextResponse.json({
     status: 'pending',

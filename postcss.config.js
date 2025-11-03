@@ -1,7 +1,6 @@
-// ESM
 export default {
   plugins: {
-    '@tailwindcss/postcss': {}, // 👈 plugin correcto
-    autoprefixer: {},
+    '@tailwindcss/postcss': {},
   },
 };
+export default { plugins: { '@tailwindcss/postcss': {} } };

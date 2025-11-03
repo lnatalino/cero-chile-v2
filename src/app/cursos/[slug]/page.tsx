@@ -2,6 +2,19 @@ import { notFound } from 'next/navigation';
 import getSupabaseServerClient from '@/lib/supabaseServer';
 import type { Course, PaymentCurrency, PaymentMethod } from '@/lib/types';
 
+interface CourseDetail {
+  id: number;
+  slug: string;
+  title: string;
+  description: string | null;
+  location: string | null;
+  date_start: string | null;
+  date_end: string | null;
+  price_clp: number | null;
+  price_usd: number | null;
+  cover_url: string | null;
+}
+
 function formatCurrency(value: number | null, currency: 'CLP' | 'USD') {
   if (value == null) return 'Por confirmar';
   return new Intl.NumberFormat('es-CL', { style: 'currency', currency }).format(value);
@@ -13,7 +26,7 @@ function formatDate(value: string | null) {
 }
 
 export default async function CourseDetailPage({ params }: { params: { slug: string } }) {
-  const supabase = getSupabaseServerClient();
+  const supabase = await getSupabaseServerClient();
   const { data: course } = await supabase
     .from('courses')
     .select('id, slug, title, description, location, date_start, date_end, price_clp, price_usd, cover_url, status')
@@ -48,6 +61,15 @@ export default async function CourseDetailPage({ params }: { params: { slug: str
     { value: 'CLP', label: 'Peso chileno (CLP)' },
     { value: 'USD', label: 'Dólar estadounidense (USD)' },
   ];
+    .select('*')
+    .eq('slug', params.slug)
+    .maybeSingle();
+
+  if (!course) {
+    notFound();
+  }
+
+  const typedCourse = course as CourseDetail;
 
   return (
     <section className="space-y-8">
@@ -68,6 +90,15 @@ export default async function CourseDetailPage({ params }: { params: { slug: str
           <div>
             <dt className="text-sm font-semibold text-gray-800">Fecha de término</dt>
             <dd className="text-sm text-gray-600">{typedCourse.date_end ? formatDate(typedCourse.date_end) : 'Por confirmar'}</dd>
+            <dd className="text-sm text-gray-600">
+              {typedCourse.date_start ? new Date(typedCourse.date_start).toLocaleDateString('es-CL') : 'Por confirmar'}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-sm font-semibold text-gray-800">Fecha de término</dt>
+            <dd className="text-sm text-gray-600">
+              {typedCourse.date_end ? new Date(typedCourse.date_end).toLocaleDateString('es-CL') : 'Por confirmar'}
+            </dd>
           </div>
           <div>
             <dt className="text-sm font-semibold text-gray-800">Valor CLP</dt>
@@ -147,9 +178,18 @@ export default async function CourseDetailPage({ params }: { params: { slug: str
               ))}
             </select>
           </div>
+            <button
+              type="submit"
+              className="mt-2 rounded-full bg-orange-600 px-4 py-2 text-sm font-semibold text-white shadow transition hover:bg-orange-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-500"
+            >
+              <option value="webpay">Webpay</option>
+              <option value="transfer">Transferencia</option>
+              <option value="cash">Efectivo</option>
+            </select>
+          </div>
           <button
             type="submit"
-            className="mt-2 rounded-full bg-orange-600 px-4 py-2 text-sm font-semibold text-white shadow transition hover:bg-orange-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-500"
+            className="mt-2 rounded-full bg-orange-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-orange-700"
           >
             Enviar inscripción
           </button>

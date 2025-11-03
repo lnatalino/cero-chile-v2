@@ -5,8 +5,12 @@ import type { AdminRole } from '@/lib/types';
 
 const ADMIN_ROLES = new Set<AdminRole>(['admin', 'gestor', 'faculty']);
 
+const ADMIN_ROLES = new Set(['admin', 'gestor', 'faculty'] as const);
+
+type AdminRole = 'admin' | 'gestor' | 'faculty';
+
 export default async function AdminPage() {
-  const supabase = getSupabaseServerClient();
+  const supabase = await getSupabaseServerClient();
   const { data: auth } = await supabase.auth.getUser();
   const user = auth.user;
 
@@ -19,6 +23,7 @@ export default async function AdminPage() {
     .select('full_name, role')
     .eq('id', user.id)
     .maybeSingle();
+  const { data: profile } = await supabase.from('profiles').eq('id', user.id).maybeSingle();
   const role = profile?.role as AdminRole | undefined;
 
   if (!role || !ADMIN_ROLES.has(role)) {
@@ -50,6 +55,7 @@ export default async function AdminPage() {
               href={`/admin/${tab.key}`}
               className="mt-4 inline-flex text-sm font-semibold text-orange-600 transition hover:text-orange-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-500"
             >
+            <Link href={`/admin/${tab.key}`} className="mt-4 inline-flex text-sm font-semibold text-orange-600">
               Abrir sección
             </Link>
           </div>

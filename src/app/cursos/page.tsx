@@ -2,6 +2,20 @@ import Link from 'next/link';
 import getSupabaseServerClient from '@/lib/supabaseServer';
 import type { Course } from '@/lib/types';
 
+export type CourseRow = {
+  id: number;
+  slug: string;
+  title: string;
+  description: string | null;
+  location: string | null;
+  date_start: string | null;
+  date_end: string | null;
+  price_clp: number | null;
+  price_usd: number | null;
+  cover_url: string | null;
+  status: 'draft' | 'published';
+};
+
 function formatCurrency(value: number | null, currency: 'CLP' | 'USD'): string {
   if (value == null) return 'Por confirmar';
   return new Intl.NumberFormat('es-CL', { style: 'currency', currency }).format(value);
@@ -13,7 +27,7 @@ function formatDate(value: string | null): string {
 }
 
 export default async function CoursesPage() {
-  const supabase = getSupabaseServerClient();
+  const supabase = await getSupabaseServerClient();
   const { data } = await supabase
     .from('courses')
     .select('id, slug, title, description, location, date_start, date_end, price_clp, price_usd, cover_url, status')
@@ -33,6 +47,11 @@ export default async function CoursesPage() {
     cover_url: course.cover_url ?? null,
     status: course.status,
   }));
+    .select('*')
+    .eq('status', 'published')
+    .order('date_start', { ascending: true });
+
+  const courses: CourseRow[] = Array.isArray(data) ? (data as CourseRow[]) : [];
 
   return (
     <section className="space-y-6">
@@ -69,6 +88,11 @@ export default async function CoursesPage() {
                 <div>
                   <dt className="font-semibold text-gray-800">Fecha de cierre</dt>
                   <dd>{course.date_end ? formatDate(course.date_end) : 'Por confirmar'}</dd>
+                  <dd>{course.date_start ? new Date(course.date_start).toLocaleDateString('es-CL') : 'Por confirmar'}</dd>
+                </div>
+                <div>
+                  <dt className="font-semibold text-gray-800">Fecha de cierre</dt>
+                  <dd>{course.date_end ? new Date(course.date_end).toLocaleDateString('es-CL') : 'Por confirmar'}</dd>
                 </div>
                 <div>
                   <dt className="font-semibold text-gray-800">Valor CLP</dt>
@@ -84,6 +108,7 @@ export default async function CoursesPage() {
                   href={`/cursos/${course.slug}`}
                   className="rounded-full bg-orange-600 px-4 py-2 text-sm font-semibold text-white shadow transition hover:bg-orange-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-500"
                 >
+                <Link href={`/cursos/${course.slug}`} className="rounded-full bg-orange-600 px-4 py-2 text-sm font-semibold text-white">
                   Ver detalles
                 </Link>
               </div>
