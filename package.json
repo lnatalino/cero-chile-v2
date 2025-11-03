@@ -1,0 +1,31 @@
+{
+  "name": "cero-chile-v2",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev -p 3004",
+    "start": "next start -p 3004",
+    "build": "next build",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@supabase/ssr": "file:vendor/supabase-ssr",
+    "next": "file:vendor/next",
+    "pdf-lib": "file:vendor/pdf-lib",
+    "react": "file:vendor/react",
+    "react-dom": "file:vendor/react-dom",
+    "resend": "file:vendor/resend"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "file:vendor/tailwindcss-postcss",
+    "@types/node": "file:vendor/types-node",
+    "@types/react": "file:vendor/types-react",
+    "@types/react-dom": "file:vendor/types-react-dom",
+    "autoprefixer": "file:vendor/autoprefixer",
+    "eslint": "file:/root/.nvm/versions/node/v22.19.0/lib/node_modules/eslint",
+    "postcss": "file:vendor/postcss",
+    "tailwindcss": "file:vendor/tailwindcss",
+    "typescript": "file:/root/.nvm/versions/node/v22.19.0/lib/node_modules/typescript"
+  }
+}
